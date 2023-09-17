@@ -1,1 +1,26 @@
-mainWidget:
+#:kivy 2.2.1
+FullScreen:
+
+<FullScreen>:
+    orientation: "vertical"
+    Label:
+        size_hint: 1, .1
+        text: "Please enter the names and values of each item purchased"
+    ScrollView:
+        Inputs:
+            id: ingrid
+            cols: 2
+            size_hint: 1, None
+            height: self.minimum_height
+    Button:
+        text: "+"
+        size_hint: .3, .1
+        pos_hint: {"x": .35}
+        on_press: ingrid.addLine(1)
+    Button:
+        text: "Get your moneys back!"
+        size_hint: .2, .2
+        pos_hint: {"x": .4}
+        on_press: root.logic()
+    ScrollView:
+        id: scroller
