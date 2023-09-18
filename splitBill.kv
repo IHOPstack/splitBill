@@ -18,9 +18,14 @@ FullScreen:
         pos_hint: {"x": .35}
         on_press: ingrid.addLine(1)
     Button:
+        text: "fill4test"
+        size_hint: .3, .1
+        on_press: ingrid.fill4test()
+    Button:
         text: "Get your moneys back!"
         size_hint: .2, .2
         pos_hint: {"x": .4}
         on_press: root.logic()
     ScrollView:
         id: scroller
+        size_hint: 1, 1
