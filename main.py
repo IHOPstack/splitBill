@@ -48,7 +48,7 @@ class Inputs(GridLayout):
         self.tax.text = str(i)
         self.tip.text = str(i)
     def PhotoInput(self):
-        image = cv2.imread('receipt2.jpeg')
+        image = cv2.imread('testReceipts/biergarten.jpeg')
         text = pytesseract.image_to_string(image)
         moneyList = re.findall("\d+\.\d{2}", text)
         entries = {}
@@ -66,7 +66,7 @@ class Inputs(GridLayout):
                         break
                     if "TIP" in item:
                         tipEntry = price
-                        break                   
+                        break
                     entries[item] = price
         self.addLine((len(entries) - 5))
         count = 0
@@ -78,11 +78,7 @@ class Inputs(GridLayout):
             tuple = self.lineList[count]
             tuple[0].text = key
             tuple[1].text = entries[key]
-            count += 1        
-        
-
-
-
+            count += 1
         
 class FullScreen(BoxLayout):
     people = {}
