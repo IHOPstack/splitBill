@@ -15,6 +15,7 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
+from kivy.uix.popup import Popup
 
 class Inputs(GridLayout):
     textl = "Name"
@@ -50,35 +51,48 @@ class Inputs(GridLayout):
     def PhotoInput(self):
         image = cv2.imread('testReceipts/biergarten.jpeg')
         text = pytesseract.image_to_string(image)
-        moneyList = re.findall("\d+\.\d{2}", text)
-        entries = {}
+        totalTerms = ["Total", "TOTAL", "Subtotal", "SUBTOTAL"]
+        tipTerms = ["TIP", "GRATUITY"]
+        entries = []
         taxEntry = None
         tipEntry = None
-        for price in moneyList:
-            for line in text.split("\n"):
-                if price in line:
-                    ind = line.index(price)
-                    item = line[0:ind]
-                    if item.strip() == "TOTAL":
+        for line in text.split("\n"):
+            Match = re.search("\d+\.\d{2}", line)
+            if Match != None:
+                price = line[Match.start():Match.end()]
+                item = line[0:Match.start()].strip()
+                match item:
+                    case "TOTAL":
                         break
-                    if "TAX" in item:
-                        taxEntry = price
-                        break
-                    if "TIP" in item:
+                    case "TIP":
                         tipEntry = price
                         break
-                    entries[item] = price
+                    case "TAX":
+                        taxEntry = price
+                        break
+                    case _:
+                        entries.append((item, price))
+        if entries == []:
+            noneFound = Popup(title = "no items found", content = Label(text = "Please provide better image or enter fields manually"), size_hint = (.5, .5))
+            noneFound.open()
+            return
         self.addLine((len(entries) - 5))
         count = 0
-        for key in entries:
+        for itemFromReceipt in entries:
+            print(itemFromReceipt)
             if taxEntry != None:
                 self.tax.text = str(taxEntry)
             if tipEntry != None:
                 self.tip.text = str(tipEntry)
-            tuple = self.lineList[count]
-            tuple[0].text = key
-            tuple[1].text = entries[key]
+            TIpair = self.lineList[count]
+            TIpair[0].text = itemFromReceipt[0]
+            TIpair[1].text = itemFromReceipt[1]
             count += 1
+
+
+
+
+
         
 class FullScreen(BoxLayout):
     people = {}
