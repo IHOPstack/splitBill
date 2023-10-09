@@ -32,6 +32,12 @@ class Inputs(GridLayout):
             self.placement -= 1
             TItuple = (TIname, TImoney)
             self.lineList.append(TItuple)
+    def clearLines(self):
+        for pair in self.lineList:
+            pair[0].text=""
+            pair[1].text=""
+            self.tax.text=""
+            self.tip.text=""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.addLine(5)
