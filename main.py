@@ -18,16 +18,14 @@ from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 
 class Inputs(GridLayout):
-    textl = "Name"
-    textr = "$0.00"
     lineList = []
     placement = 0
     tax = TextInput(hint_text = "tax", size_hint = (.5, None), height = 50)
     tip = TextInput(hint_text = "tip", size_hint = (.5, None), height = 50)
     def addLine(self, x):
         for i in range(0, (x)):
-            TIname = TextInput(hint_text = self.textl, size_hint = (.5, None), height = 50)
-            TImoney = TextInput(hint_text = self.textr, size_hint = (.5, None), height = 50)
+            TIname = TextInput(hint_text = "Name", size_hint = (.5, None), height = 50)
+            TImoney = TextInput(hint_text = "$0.00", size_hint = (.5, None), height = 50)
             self.add_widget(TIname, index = self.placement)
             self.placement -= 1
             self.add_widget(TImoney, index = self.placement)
@@ -49,8 +47,10 @@ class Inputs(GridLayout):
         self.tax.text = str(i)
         self.tip.text = str(i)
     def PhotoInput(self):
-        image = cv2.imread('testReceipts/biergarten.jpeg')
-        text = pytesseract.image_to_string(image)
+        image = cv2.imread('testReceipts/coffeeScan.jpeg')
+        customfig = "--user-patterns configs/tesseract/user-patterns --user-words configs/tesseract/user-words --psm 4"
+        text = pytesseract.image_to_string(image, config = customfig)
+        print(text)
         totalTerms = ["Total", "TOTAL", "Subtotal", "SUBTOTAL"]
         tipTerms = ["TIP", "GRATUITY"]
         entries = []
@@ -61,15 +61,13 @@ class Inputs(GridLayout):
             if Match != None:
                 price = line[Match.start():Match.end()]
                 item = line[0:Match.start()].strip()
-                match item:
+                match item.capitalize():
                     case "TOTAL":
-                        break
-                    case "TIP":
+                        pass
+                    case "TIP" | "GRATUITY":
                         tipEntry = price
-                        break
                     case "TAX":
                         taxEntry = price
-                        break
                     case _:
                         entries.append((item, price))
         if entries == []:
@@ -79,7 +77,6 @@ class Inputs(GridLayout):
         self.addLine((len(entries) - 5))
         count = 0
         for itemFromReceipt in entries:
-            print(itemFromReceipt)
             if taxEntry != None:
                 self.tax.text = str(taxEntry)
             if tipEntry != None:
@@ -97,9 +94,10 @@ class Inputs(GridLayout):
 class FullScreen(BoxLayout):
     people = {}
     def logic(self):
-        itemList = [(Inputs.lineList[i].text,Inputs.lineList[i+1].text) for i in range(0, len(Inputs.lineList), 2)]
+        itemList = [(Inputs.lineList[i][0].text,Inputs.lineList[i][1].text) for i in range(0, len(Inputs.lineList))]
         taxTip = float(Inputs.tax.text) + float(Inputs.tip.text)
         people = self.people
+        people.clear()
         subtotal = 0
         for pair in itemList:
             try:
@@ -115,7 +113,12 @@ class FullScreen(BoxLayout):
             billPercent = price/subtotal
             taxTipShare = billPercent * taxTip
             people[person] = ceil((taxTipShare + price) * 100) / 100
-        self.ids.scroller.add_widget(Results())
+        onScreen = Results()
+        try:
+            self.ids.scroller.add_widget(onScreen)
+        except Exception:
+            self.ids.scroller.clear_widgets()
+            self.ids.scroller.add_widget(onScreen)
 
 class Results(GridLayout):
     def __init__(self, **kwargs):
@@ -125,12 +128,14 @@ class Results(GridLayout):
         self.bind(minimum_height = self.setter("height"))
         people = FullScreen.people
         total = 0
+        print(people)
         for key in people:
             cost = people[key]
             name = str(key)
             self.add_widget(Label(text = f"{name} owes ${cost}", size_hint = (1, None), height = 50))
             total += cost
         self.add_widget(Label(text = f"Total amound paid is ${total}", size_hint = (1, None), height = 50))
+        print(people)
 
 
 
