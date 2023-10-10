@@ -53,6 +53,7 @@ class Inputs(GridLayout):
         self.tax.text = str(i)
         self.tip.text = str(i)
     def PhotoInput(self):
+        self.clearLines()
         image = cv2.imread('testReceipts/coffeeScan.jpeg')
         customfig = "--user-patterns configs/tesseract/user-patterns --user-words configs/tesseract/user-words --psm 4"
         text = pytesseract.image_to_string(image, config = customfig)
@@ -80,7 +81,7 @@ class Inputs(GridLayout):
             noneFound = Popup(title = "no items found", content = Label(text = "Please provide better image or enter fields manually"), size_hint = (.5, .5))
             noneFound.open()
             return
-        self.addLine((len(entries) - 5))
+        self.addLine((len(entries) - len(self.lineList)))
         count = 0
         for itemFromReceipt in entries:
             if taxEntry != None:
@@ -148,5 +149,6 @@ class Results(GridLayout):
 
 class splitBillApp(App):
     Window.size = (350, 700)
+    Window.clearcolor = '#fc8c03'
 
 splitBillApp().run()
