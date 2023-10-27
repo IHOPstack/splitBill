@@ -54,29 +54,38 @@ class Inputs(GridLayout):
         self.tip.text = str(i)
     def PhotoInput(self):
         self.clearLines()
-        image = cv2.imread('testReceipts/coffeeScan.jpeg')
+        image = cv2.imread('testReceipts/ginos.jpeg')
         customfig = "--user-patterns configs/tesseract/user-patterns --user-words configs/tesseract/user-words --psm 4"
         text = pytesseract.image_to_string(image, config = customfig)
         print(text)
-        totalTerms = ["Total", "TOTAL", "Subtotal", "SUBTOTAL"]
-        tipTerms = ["TIP", "GRATUITY"]
         entries = []
         taxEntry = None
         tipEntry = None
-        for line in text.split("\n"):
+        haveTip = False
+        haveTax = False
+        for line in text.split("\n") :
             Match = re.search("\d+\.\d{2}", line)
             if Match != None:
                 price = line[Match.start():Match.end()]
                 item = line[0:Match.start()].strip()
+                if price == "0.00":
+                    continue
                 match item.capitalize():
-                    case "TOTAL":
-                        pass
-                    case "TIP" | "GRATUITY":
+                    case "Total" | "Subtotal":
+                        print("Total/Subtotal = ", price)
+                    case "Tip $" | "Gratuity":
                         tipEntry = price
-                    case "TAX":
+                        haveTip = True
+                        if haveTax:
+                            break
+                    case "Tax $":
                         taxEntry = price
+                        haveTax = True
+                        if haveTip:
+                            break
                     case _:
                         entries.append((item, price))
+                        print("default case")
         if entries == []:
             noneFound = Popup(title = "no items found", content = Label(text = "Please provide better image or enter fields manually"), size_hint = (.5, .5))
             noneFound.open()
@@ -135,15 +144,12 @@ class Results(GridLayout):
         self.bind(minimum_height = self.setter("height"))
         people = FullScreen.people
         total = 0
-        print(people)
         for key in people:
             cost = people[key]
             name = str(key)
             self.add_widget(Label(text = f"{name} owes ${cost}", size_hint = (1, None), height = 50))
             total += cost
         self.add_widget(Label(text = f"Total amound paid is ${total}", size_hint = (1, None), height = 50))
-        print(people)
-
 
 
 
