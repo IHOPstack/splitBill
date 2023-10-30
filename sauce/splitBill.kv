@@ -1,0 +1,40 @@
+#:kivy 2.2.1
+FullScreen:
+
+<FullScreen>:
+    orientation: "vertical"
+    Label:
+        size_hint: 1, .1
+        text: "Please enter the names and values of each item purchased"
+    ScrollView:
+        Inputs:
+            id: ingrid
+            cols: 2
+            size_hint: 1, None
+            height: self.minimum_height
+    BoxLayout:
+        size_hint: 1,.1
+        orientation: "horizontal"
+        Button:
+            text: "+"
+            on_press: ingrid.addLine(1)
+        Button:
+            text: "clear fields"
+            on_press: ingrid.clearLines()
+    BoxLayout:
+        size_hint: 1,.1
+        orientation: "horizontal"
+        Button:
+            text: "fill4test"
+            on_press: ingrid.fill4test()
+        Button:
+            text: "use photo"
+            on_press: ingrid.PhotoInput()
+    Button:
+        text: "Get your moneys back!"
+        size_hint: .2, .2
+        pos_hint: {"x": .4}
+        on_press: root.logic()
+    ScrollView:
+        id: scroller
+        size_hint: 1, 1
