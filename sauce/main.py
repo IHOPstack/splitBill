@@ -61,10 +61,10 @@ class Inputs(GridLayout):
         self.clearLines()
 
         #select image
-        image = cv2.imread('testReceipts/ginosSilver.jpeg')
+        image = cv2.imread('testReceipts/receipt2.jpeg')
         height, width, _ = image.shape
 
-        #scan imagel
+        #scan image
         scanner.scan(image)
 
         #detect and read text

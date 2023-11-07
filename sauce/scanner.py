@@ -13,7 +13,7 @@ def eagleEye(image): #Top-down view
     dilated = cv2.dilate(blurred, kernel)
     closing = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=3)
     cv2.imshow('closed', closing)
-    edges = cv2.Canny(closing, 75, 200)
+    edges = cv2.Canny(closing, 50, 200)
     cv2.imshow('edged', edges)
     cv2.waitKey(0)
     #find receipt contour
@@ -24,29 +24,36 @@ def eagleEye(image): #Top-down view
     for c in contours:
         output = image.copy()
         perimeter = cv2.arcLength(c, True)
-        print(cv2.contourArea(c))
-        print(perimeter)
-        approx = cv2.approxPolyDP(c, 3, True)
-        print(approx)
-
+        approx = cv2.approxPolyDP(c, .02*perimeter, True)
+        print(len(approx))
         cv2.drawContours(output, [approx], -1, (0, 255, 0), 2)
         cv2.imshow("sequencce", output)
-
-        rectangle = cv2.boundingRect(approx)
-        rectX, rectY, rectWidth, rectHeight = rectangle
-        print(rectangle, rectX, rectY, rectWidth, rectHeight)
         cv2.waitKey(0)
-        rectArea = rectWidth * rectHeight
-        if rectArea > 5000: #arbitrary size that should narrow most false rectangles
-            hull = cv2.convexHull(c)
-
-
+        if len(approx) == 4:
+            receiptContour = approx
+            print(receiptContour)
+            break
     if receiptContour is None:
         print("receipt not found")
     #troubleshooting visualization
     output = image.copy()
     cv2.drawContours(output, [receiptContour], -1, (0, 255, 0), 2)
     cv2.imshow("outline", output)
+    cv2.waitKey(0)
+    #find rectangle lengths
+    (A, B, C, D) = receiptContour
+    print(A, B, C, D)
+    dx1 = numpy.linalg.norm(A-D)
+    dx2 = numpy.linalg.norm(B-C)
+    width = int(max(dx1, dx2))
+    dy1 = numpy.linalg.norm(A-B)
+    dy2 = numpy.linalg.norm(D-C)
+    height = int(max(dy1, dy2))
+    inpoints = numpy.float32(receiptContour)
+    outpoints = numpy.float32([[0, 0], [0, height-1], [width-1, height-1], [width-1, 0]])
+    canvas = cv2.getPerspectiveTransform(inpoints, outpoints)
+    topDown = cv2.warpPerspective(image, canvas, (width, height), flags = cv2.INTER_LINEAR)
+    cv2.imshow("top", topDown)
     cv2.waitKey(0)
         
 
