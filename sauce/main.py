@@ -61,20 +61,21 @@ class Inputs(GridLayout):
         self.clearLines()
 
         #select image
-        image = cv2.imread('testReceipts/ginosScan.jpeg')
+        image = cv2.imread('testReceipts/ginosSilver.jpeg')
         height, width, _ = image.shape
-        image = (cv2.resize(image, (width*2, height*2)))
 
-        #scan image
+        #scan imagel
+        scanner.scan(image)
 
         #detect and read text
+        image = (cv2.resize(image, (width*2, height*2)))
         customfig = "--user-patterns configs/tesseract/user-patterns --user-words configs/tesseract/user-words --oem 1 --psm 4"
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         text = pytesseract.image_to_string(rgb, config=customfig)
 
         
 
-        #filter unnecessary lines
+        #filter unnecessary text
         print(text)
         entries = []
         taxEntry = None
