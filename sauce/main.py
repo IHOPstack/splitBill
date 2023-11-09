@@ -6,6 +6,7 @@ import argparse
 import numpy
 import imutils
 import scanner
+from types import NoneType
 from imutils.object_detection import non_max_suppression
 from kivy.core.window import Window
 from kivy.app import App
@@ -21,6 +22,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
+from kivy.uix.image import Image
 
 class Inputs(GridLayout):
     lineList = []
@@ -61,16 +63,23 @@ class Inputs(GridLayout):
         self.clearLines()
 
         #select image
-        image = cv2.imread('testReceipts/receipt2.jpeg')
+        imagePath = 'testReceipts/sushi.jpeg'
+        image = cv2.imread(imagePath)
         height, width, _ = image.shape
 
-        #scan image
-        scanner.scan(image)
+        #scan and process image
+        receiptContours = scanner.findCorners(image)
+        if isinstance(receiptContours, NoneType):
+            noneFound = Popup(title = "no items found", content = Label(text = "Please provide better image or enter fields manually"), size_hint = (.5, .5))
+            noneFound.open()
+
+        topdown = scanner.eagleEye(image, receiptContours)
+        binary = scanner.binarize(topdown)
 
         #detect and read text
-        image = (cv2.resize(image, (width*2, height*2)))
+        scaledImage = (cv2.resize(binary, (width*2, height*2)))
         customfig = "--user-patterns configs/tesseract/user-patterns --user-words configs/tesseract/user-words --oem 1 --psm 4"
-        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        rgb = cv2.cvtColor(scaledImage, cv2.COLOR_BGR2RGB)
         text = pytesseract.image_to_string(rgb, config=customfig)
 
         

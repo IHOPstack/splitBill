@@ -3,9 +3,12 @@ import pytesseract
 import re
 import numpy
 import imutils
-from imutils.object_detection import non_max_suppression
 
-def eagleEye(image): #Top-down view
+def findCorners(OGimage):
+    #Norm!
+    originalImage = OGimage.copy()
+    newDimensions = numpy.zeros((originalImage.shape[0], originalImage.shape[1]))
+    image = cv2.normalize(originalImage, newDimensions, 0, 255, cv2.NORM_MINMAX)
     #pre-process image
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5,5), 0)
@@ -33,13 +36,9 @@ def eagleEye(image): #Top-down view
             receiptContour = approx
             print(receiptContour)
             break
-    if receiptContour is None:
-        print("receipt not found")
-    #troubleshooting visualization
-    output = image.copy()
-    cv2.drawContours(output, [receiptContour], -1, (0, 255, 0), 2)
-    cv2.imshow("outline", output)
-    cv2.waitKey(0)
+    return receiptContour
+
+def eagleEye(image, receiptContour):
     #find rectangle lengths
     (A, B, C, D) = receiptContour
     print(A, B, C, D)
@@ -55,30 +54,13 @@ def eagleEye(image): #Top-down view
     topDown = cv2.warpPerspective(image, canvas, (width, height), flags = cv2.INTER_LINEAR)
     cv2.imshow("top", topDown)
     cv2.waitKey(0)
+    return topDown
         
+def binarize(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5,5), 0)
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2)
+    cv2.imshow('binart', thresh)
+    return thresh
 
 
-
-def scan(image):
-    #Norm!
-    originalImage = image.copy()
-    newDimensions = numpy.zeros((originalImage.shape[0], originalImage.shape[1]))
-    normie = cv2.normalize(originalImage, newDimensions, 0, 255, cv2.NORM_MINMAX)
-    eagleEye(normie)
-
-#Scaling
-
-
-#Noise Reduction
-
-
-#Skeletor
-
-
-#Fifty Shades of Grey
-
-
-#Thresholding
-
-
-#ROI Selection
